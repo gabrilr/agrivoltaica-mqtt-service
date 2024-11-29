@@ -1,9 +1,8 @@
 
 import mqtt from 'mqtt';
-import mysql from 'mysql2';
 import dotenv from 'dotenv';
 
-import { db } from '../database/db.js';
+import { db } from '..database/db.js';
 
 dotenv.config();
 // Configuración del cliente MQTT
