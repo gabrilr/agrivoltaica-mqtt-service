@@ -2,12 +2,14 @@
 import mqtt from 'mqtt';
 import dotenv from 'dotenv';
 
-import { db } from '..database/db.js';
+import { db } from './db.js';
 
 dotenv.config();
-// Configuración del cliente MQTT
-const mqttClient = mqtt.connect(`mqtt://${MQTT_HOST}`);  // URL del broker MQTT
 
+const mqttClient = mqtt.connect(`mqtt://${process.env.MQTT_HOST}:${process.env.MQTT_PORT}`, {
+    username: process.env.MQTT_USERNAME,
+    password: process.env.MQTT_PASSWORD,
+});
 // Suscribirse al canal de MQTT donde recibes los datos
 mqttClient.on('connect', () => {
     console.log('Conectado al broker MQTT');
@@ -26,6 +28,7 @@ mqttClient.on('message', (topic, message) => {
         // Parsear el mensaje recibido (JSON)
         const data = JSON.parse(message.toString());
         
+        
         // Desestructurar los datos recibidos
         const { mac, iluminacion, humedad_suelo, iluminacion_2, humedad_suelo_2, temp, humedad_aire, fecha_hora } = data;
 
@@ -35,14 +38,16 @@ mqttClient.on('message', (topic, message) => {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
         const values = [mac, iluminacion, humedad_suelo, iluminacion_2, humedad_suelo_2, temp, humedad_aire, fecha_hora];
-
+        console.log('Envio de datos correctos'+ JSON.stringify(data));
+        
         db.query(query, values, (err, result) => {
             if (err) {
                 console.error('Error al insertar los datos en la base de datos:', err);
             } else {
-                console.log('MQTT Service: Datos insertados correctamente:', result);
+                console.log('Envio de datos correctos'+ JSON.stringify(data));
             }
         });
+
     } catch (error) {
         console.error('Error al procesar el mensaje de MQTT:', error);
     }
